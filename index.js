@@ -58,7 +58,23 @@ app.get("/services", async (req, res) => {
 
     res.status(200).send({
       error: false,
-      message: "SERVER is UP and RUnning",
+      data,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(501).send({ error: true, message: "Query Failed" });
+  }
+});
+
+/* Get comments */
+app.get("/comments", async (req, res) => {
+  try {
+    const { service_id } = req.headers;
+    const query = { service_id: ObjectId(service_id) };
+    const data = await commentsCollection.find(query).toArray();
+
+    res.status(200).send({
+      error: false,
       data,
     });
   } catch (error) {

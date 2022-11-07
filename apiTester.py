@@ -20,12 +20,11 @@ def GET_TOKEN():
 '''
 
 def GET():
-    header = { "Content-Type":"application/json"}
-    url = URL + "/services"
+    header = { "Content-Type":"application/json", "service_id": "63694a76069a6e37d0afa78a"}
+    url = URL + "/comments"
     res = rq.get(url, headers=header)
     result = res.json()
-    for data in result["data"]:
-        print(data["title"])
+    print(result)
 
 def POST():
     header = { "Content-Type":"application/json", "uid":"someUsersUid", "service_id":"63694a76069a6e37d0afa78a"}
@@ -42,4 +41,7 @@ def DELETE():
     result = res.json()
     print(result)
 
-DELETE()
+#POST()
+#POST()
+GET()
+
