@@ -73,13 +73,17 @@ app.get("/services", async (req, res) => {
 /* Post comments */
 app.post("/comments", async (req, res) => {
   try {
+    // Later uid will be recevied via JWT token
     const { uid, service_id } = req.headers;
 
     /*
      * // Body Interface
      * body: {
+     *  displayName: String,
+     *  email: String,
      *	review: String,
-     *
+     *  time: new Data(),
+     *  rating: Number
      * }
      *
      */
@@ -96,6 +100,25 @@ app.post("/comments", async (req, res) => {
   }
 });
 // END of Handling POST requests ------------------
+
+// Handling DELETE requests
+app.delete("/comment", async (req, res) => {
+  try {
+    const { comment_id } = req.headers;
+    const query = { _id: ObjectId(comment_id) };
+    const response = await commentsCollection.deleteOne(query);
+    if (response.acknowledged) {
+      const rs = { ...response, error: false };
+      res.status(200).send(rs);
+    } else {
+      res.status(501).send({ error: true, message: "COMMENT DELETE FAILED!!" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(501).send({ error: true, message: "COMMENT DELETE FAILED!!" });
+  }
+});
+// END of Handling DELETE requests ------------------
 
 // Listening to PORT
 app.listen(PORT, () => console.log(`SERVER is running at port: ${PORT}`));
