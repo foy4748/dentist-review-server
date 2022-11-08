@@ -75,12 +75,22 @@ async function run() {
 
     /* Get services */
     app.get("/services", async (req, res) => {
+      const { limit } = req.headers;
+      let data;
       try {
         const query = {};
-        const data = await servicesCollection
-          .find(query)
-          .sort({ time: -1 })
-          .toArray();
+        if (parseInt(limit)) {
+          data = await servicesCollection
+            .find(query)
+            .sort({ time: -1 })
+            .limit(parseInt(limit))
+            .toArray();
+        } else {
+          data = await servicesCollection
+            .find(query)
+            .sort({ time: -1 })
+            .toArray();
+        }
 
         res.setHeader("Content-Type", "application/json");
         res.status(200).send({
