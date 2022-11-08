@@ -77,7 +77,10 @@ async function run() {
     app.get("/services", async (req, res) => {
       try {
         const query = {};
-        const data = await servicesCollection.find(query).toArray();
+        const data = await servicesCollection
+          .find(query)
+          .sort({ time: -1 })
+          .toArray();
 
         res.setHeader("Content-Type", "application/json");
         res.status(200).send({
@@ -201,6 +204,22 @@ async function run() {
         console.error(error);
         res.setHeader("Content-Type", "application/json");
         res.status(501).send({ error: true, message: "COMMENT POST FAILED!!" });
+      }
+    });
+
+    /* Post Services */
+    app.post("/services", authGuard, async (req, res) => {
+      try {
+        const body = req.body;
+        const { uid } = res.decoded;
+        const load = { ...body, uid };
+        const result = await servicesCollection.insertOne(load);
+        res.setHeader("Content-Type", "application/json");
+        res.status(200).send({ error: false, ...result });
+      } catch (error) {
+        console.error(error);
+        res.setHeader("Content-Type", "application/json");
+        res.status(501).send({ error: true, message: "SERVICE POST FAILED!!" });
       }
     });
     // END of Handling POST requests ------------------
