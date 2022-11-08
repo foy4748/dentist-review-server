@@ -2,6 +2,7 @@
 const express = require("express");
 const mongodb = require("mongodb");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
 //-----------------------------------------
 
 // -------------------- Initializations --------------------
@@ -26,7 +27,7 @@ app.use(cors());
 
 //------------------- Accessing Secrets --------------------
 const PORT = process.env.PORT || process.env.DEV_PORT;
-const { DB_URI, DB_NAME } = process.env;
+const { DB_URI, DB_NAME, SECRET_JWT } = process.env;
 //-----------------------------------------
 
 //---------------- CONNECT MONGODB -------------------
@@ -99,6 +100,20 @@ async function run() {
         res.status(501).send({ error: true, message: "Query Failed" });
       }
     });
+
+    // Token Signing API END point
+    app.get("/auth", async (req, res) => {
+      try {
+        const { uid } = req.headers;
+        const authtoken = jwt.sign({ uid }, SECRET_JWT);
+        res.setHeader("Content-Type", "application/json");
+        res.status(200).send({ error: false, authtoken });
+      } catch (error) {
+        console.error(error);
+        res.setHeader("Content-Type", "application/json");
+        res.status(501).send({ error: true, message: "TOKEN SIGNING FAILED" });
+      }
+    });
     // END of Handling GET requests ------------------
 
     // Handling POST requests
@@ -115,7 +130,7 @@ async function run() {
          *  displayName: String,
          *  email: String,
          *	review: String,
-         *  time: new Data(),
+         *  time: new Date(),
          *  rating: Number
          * }
          *
