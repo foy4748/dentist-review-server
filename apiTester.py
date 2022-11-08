@@ -2,6 +2,7 @@ import requests as rq
 import re
 
 URL = "http://localhost:3001"
+URL = "https://ph-server-assignment-11.vercel.app/"
 #QUERY = "?uid=something_something"
 
 # service 1 _id 63694a76069a6e37d0afa78a
@@ -21,7 +22,7 @@ def GET_TOKEN():
 
 def GET():
     header = { "Content-Type":"application/json", "service_id": "63694a76069a6e37d0afa78a"}
-    url = URL + "/comments"
+    url = URL + "/services"
     res = rq.get(url, headers=header)
     result = res.json()
     print(result)
