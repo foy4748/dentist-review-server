@@ -30,6 +30,33 @@ const PORT = process.env.PORT || process.env.DEV_PORT;
 const { DB_URI, DB_NAME, SECRET_JWT } = process.env;
 //-----------------------------------------
 
+//---------------- Middleware Functions -------------------
+
+// Authorization Middleware
+const authGuard = async (req, res, next) => {
+  const { authtoken } = req.headers;
+  try {
+    const decoded = jwt.verify(authtoken, SECRET_JWT);
+    if (decoded) {
+      res.decoded = {};
+      res.decoded = decoded;
+      next();
+    } else {
+      res
+        .status(403)
+        .send({ error: true, message: "Unauthorized action attempted" })
+        .end();
+    }
+  } catch (error) {
+    console.error(error.message);
+    res
+      .status(403)
+      .send({ error: true, message: "Auth-z failed. Invalid Token" })
+      .end();
+  }
+};
+//-----------------------------------------
+
 //---------------- CONNECT MONGODB -------------------
 
 const client = new MongoClient(DB_URI, {
@@ -104,6 +131,27 @@ async function run() {
       }
     });
 
+    /* Get user specific comments */
+    app.get("/my-comments", authGuard, async (req, res) => {
+      try {
+        const { uid } = res.decoded;
+        const query = { uid };
+        const data = await commentsCollection
+          .find(query)
+          .sort({ time: -1 })
+          .toArray();
+
+        res.setHeader("Content-Type", "application/json");
+        res.status(200).send({
+          error: false,
+          data,
+        });
+      } catch (error) {
+        console.error(error);
+        res.setHeader("Content-Type", "application/json");
+        res.status(501).send({ error: true, message: "Query Failed" });
+      }
+    });
     // Token Signing API END point
     app.get("/auth", async (req, res) => {
       try {
@@ -122,10 +170,11 @@ async function run() {
     // Handling POST requests
 
     /* Post comments */
-    app.post("/comments", async (req, res) => {
+    app.post("/comments", authGuard, async (req, res) => {
       try {
         // Later uid will be recevied via JWT token
-        const { uid, service_id } = req.headers;
+        const { service_id } = req.headers;
+        const { uid } = res.decoded;
 
         /*
          * // Body Interface
@@ -134,7 +183,8 @@ async function run() {
          *  email: String,
          *	review: String,
          *  time: new Date(),
-         *  rating: Number
+         *  rating: Number,
+         *  service_title: String
          * }
          *
          */
@@ -156,10 +206,10 @@ async function run() {
     // END of Handling POST requests ------------------
 
     // Handling DELETE requests
-    app.delete("/comment", async (req, res) => {
+    app.delete("/delete-comment", authGuard, async (req, res) => {
       try {
-        const { comment_id } = req.headers;
-        const query = { _id: ObjectId(comment_id) };
+        const { review_id } = req.headers;
+        const query = { _id: ObjectId(review_id) };
         const response = await commentsCollection.deleteOne(query);
         if (response.acknowledged) {
           const rs = { ...response, error: false };
