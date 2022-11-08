@@ -87,7 +87,10 @@ async function run() {
       try {
         const { service_id } = req.headers;
         const query = { service_id: ObjectId(service_id) };
-        const data = await commentsCollection.find(query).toArray();
+        const data = await commentsCollection
+          .find(query)
+          .sort({ time: -1 })
+          .toArray();
 
         res.setHeader("Content-Type", "application/json");
         res.status(200).send({
