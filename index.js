@@ -63,6 +63,24 @@ async function run() {
       }
     });
 
+    /* Get a single service */
+    app.get("/service/:id", async (req, res) => {
+      try {
+        const query = { _id: ObjectId(req.params.id) };
+        const data = await servicesCollection.findOne(query);
+
+        res.setHeader("Content-Type", "application/json");
+        res.status(200).send({
+          error: false,
+          data,
+        });
+      } catch (error) {
+        console.error(error);
+        res.setHeader("Content-Type", "application/json");
+        res.status(501).send({ error: true, message: error.message });
+      }
+    });
+
     /* Get comments */
     app.get("/comments", async (req, res) => {
       try {
