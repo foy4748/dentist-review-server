@@ -165,6 +165,25 @@ async function run() {
         res.status(501).send({ error: true, message: "Query Failed" });
       }
     });
+
+    app.get("/my-comments/:id", authGuard, async (req, res) => {
+      try {
+        const { uid } = res.decoded;
+        const { id } = req.params;
+        const query = { uid, _id: ObjectId(id) };
+        const data = await commentsCollection.findOne(query);
+
+        res.setHeader("Content-Type", "application/json");
+        res.status(200).send({
+          error: false,
+          data,
+        });
+      } catch (error) {
+        console.error(error);
+        res.setHeader("Content-Type", "application/json");
+        res.status(501).send({ error: true, message: "Query Failed" });
+      }
+    });
     // Token Signing API END point
     app.get("/auth", async (req, res) => {
       try {
@@ -233,6 +252,29 @@ async function run() {
       }
     });
     // END of Handling POST requests ------------------
+
+    // Handling PATCH requests
+    app.patch("/my-comments/:id", authGuard, async (req, res) => {
+      try {
+        const { uid } = res.decoded;
+        const { id } = req.params;
+        const body = req.body;
+        const query = { uid, _id: ObjectId(id) };
+        const update = { $set: body };
+        const data = await commentsCollection.updateOne(query, update);
+
+        res.setHeader("Content-Type", "application/json");
+        res.status(200).send({
+          error: false,
+          data,
+        });
+      } catch (error) {
+        console.error(error);
+        res.setHeader("Content-Type", "application/json");
+        res.status(501).send({ error: true, message: "PATCH Failed" });
+      }
+    });
+    // END of Handling PATCH requests ------------------
 
     // Handling DELETE requests
     app.delete("/delete-comment", authGuard, async (req, res) => {
