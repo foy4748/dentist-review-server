@@ -12,17 +12,15 @@ const { MongoClient, ServerApiVersion, ObjectId } = mongodb;
 //-----------------------------------------
 
 // Middleware options
-/*
 const corsOptions = {
-  origin: process.env.CLIENT_ADDRESS || process.env.DEV_CLIENT,
+  origin: [process.env.CLIENT_ADDRESS, process.env.DEV_CLIENT],
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   withCredentials: true,
 };
-*/
 
 // Middlewares
 app.use(express.json());
-app.use(cors());
+app.use(cors(corsOptions));
 //-----------------------------------------
 
 //------------------- Accessing Secrets --------------------
